@@ -127,8 +127,3 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-/.idea/misc.xml
-/.idea/Model-Based-Reinforcement-Learning.iml
-/.idea/modules.xml
-/.idea/inspectionProfiles/profiles_settings.xml
-/.idea/vcs.xml
