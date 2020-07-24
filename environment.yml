@@ -1,0 +1,17 @@
+name: ModelBasedRL
+channels:
+  - conda-forge
+  - anaconda
+  - defaults
+dependencies:
+  - cython
+  - ipython
+  - jupyter
+  - jupyterlab
+  - matplotlib
+  - notebook
+  - numpy
+  - scipy
+  - tensorboard
+  - pip:
+    - pyzmq
