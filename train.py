@@ -22,7 +22,7 @@ def main():
         action[np.where(agent_position > target_position)] = 0
         action[np.where(agent_position < target_position)] = 2
 
-        (reward, state) = env.step(action)
+        (reward, state, done) = env.step(action)
         episode.append((state, action, reward))
         total_reward += reward
     env.close()

@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import gym
+from src.render import ToyRender
 
 
 
@@ -10,8 +11,8 @@ class ToyEnv(gym.Env):
     metadata = {'render.modes': ['console', 'file', 'human']}
 
     MAX_POSITION    = 100
-    MAX_VELOCITY    = 1
-    ACCELERATION    = 1
+    MAX_VELOCITY    = 2
+    ACCELERATION    = 0.1
     TARGET_EPSILON  = 0.1
     MAX_REWARD      = 10
 
@@ -57,7 +58,7 @@ class ToyEnv(gym.Env):
         self.previous_distance  = None
 
         # visualization:
-        self.fig = plt.figure()
+        self.visualizer = None
 
     
     def reset(self):
@@ -69,6 +70,8 @@ class ToyEnv(gym.Env):
         ) = self.state_space.sample()
 
         self.previous_distance = np.linalg.norm(self.agent_position - self.target_positions[0])
+
+        self.visualizer = ToyRender(self)
 
     
     def step(self, action):
@@ -90,40 +93,26 @@ class ToyEnv(gym.Env):
             reward = self.previous_distance - distance
             self.previous_distance = distance
 
+        done = False
         return (
             reward,
             (
                 self.agent_position,
                 self.agent_velocity,
                 self.target_positions
-            )
+            ),
+            done
         )
 
 
     def render(self, mode='console'):
         
-        assert(self.ndim == 2)
         if mode == 'human':
-            if self.fig is None:
-                self.fig = plt.figure()
-                plt.ion()
-                plt.show()
+            assert(self.ndim == 2)
+            if self.visualizer is None:
+                self.visualizer = ToyRender()
             
-            plt.scatter(self.agent_position[0], self.agent_position[1], c='black')
-            plt.scatter(self.target_positions[0][0], self.target_positions[0][1], c='red')
-
-            self.fig.gca().set_xlim(-self.MAX_POSITION, self.MAX_POSITION)
-            self.fig.gca().set_ylim(-self.MAX_POSITION, self.MAX_POSITION)
-            plt.draw()
-            plt.pause(0.0000001)
-            plt.cla()
-            # plt.show(block=False)
-            # show agent black
-            # show observable targets blue-gray
-            # highlight current target green
-            # # highlight captured targets?
-
-            # # # other idea, agent can pick his next target
+            self.visualizer.render()
 
         elif mode == 'console':
             print(self.previous_distance)
@@ -136,8 +125,6 @@ class ToyEnv(gym.Env):
         elif mode == 'file':
             pass
 
-# test = ToyEnv()
-# pass
 
 # class GoLeftEnv(gym.Env):
 #   """
