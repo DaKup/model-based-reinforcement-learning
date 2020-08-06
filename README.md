@@ -1,2 +1,2 @@
-# Model-Based-Reinforcement-Learning
+# Model-based Reinforcement Learning
 
