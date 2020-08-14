@@ -1,11 +1,12 @@
 import argparse
 import gym
 from src.env import ToyEnv
+from src.viewer import Viewer
 import numpy as np
 
 def main():
 
-    env = ToyEnv()
+    env = ToyEnv(viewer=Viewer)
     env.reset()
 
     total_reward = 0
@@ -17,12 +18,14 @@ def main():
 
         # manual policy:
         agent_position = state[0]
-        target_position = state[2][0]
+        agent_position = env.agent_position
+        target_position = env.target_positions[0]
         action = np.ones_like(action)
         action[np.where(agent_position > target_position)] = 0
         action[np.where(agent_position < target_position)] = 2
 
         (reward, state, done) = env.step(action)
+
         episode.append((state, action, reward))
         total_reward += reward
     env.close()
