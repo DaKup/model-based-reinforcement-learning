@@ -15,7 +15,7 @@ class Viewer:
     TARGET_COLOR = (0, 1, 0)
     TARGET_SIZE = 5
 
-    OBSERVABLE_COLOR = (0, 0.3, 0.7)
+    OBSERVABLE_COLOR = (0, 0, 1)
     OBSERVABLE_SIZE = 3
 
     def __init__(
@@ -43,6 +43,7 @@ class Viewer:
     def render(self, mode):
         
         if self.viewer is None:
+            
             # viewer:
             self.viewer = rendering.Viewer(self.VIEWER_WIDTH, self.VIEWER_HEIGHT)
             
@@ -74,6 +75,7 @@ class Viewer:
         self.target_transform.set_translation(*(self.scale * (self.env.target_positions[0] + self.offset)))
         
         for idx, observable_transform in enumerate(self.observable_transform):
+            self.observable[idx].set_color(0, 1 - idx * 1/len(self.observable_transform), idx * 1/len(self.observable_transform))
             observable_transform.set_translation(*(self.scale * (self.env.target_positions[idx+1] + self.offset)))
 
         return self.viewer.render(return_rgb_array = mode == 'rgb_array')
