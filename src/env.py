@@ -17,6 +17,10 @@ class ToyEnv(gym.Env):
     def __init__(self, ndim=2, num_observables=5, Viewer=None):
         super(ToyEnv, self).__init__()
 
+        # self.action_space
+        # self.observation_space
+        # self.reward_range
+
         self.ndim = ndim
         self.num_observables = num_observables
 
@@ -24,7 +28,7 @@ class ToyEnv(gym.Env):
             3 for _ in range(self.ndim) # backward, still, forward
             ])
         
-        self.state_space = gym.spaces.Tuple([
+        self.observation_space = gym.spaces.Tuple([
             # position:
             gym.spaces.Box(
                 low=-self.MAX_POSITION,
@@ -66,7 +70,7 @@ class ToyEnv(gym.Env):
             self.agent_position,
             self.agent_velocity,
             self.target_positions
-        ) = self.state_space.sample()
+        ) = self.observation_space.sample()
 
         self.previous_distance = np.linalg.norm(self.agent_position - self.target_positions[0])
         self.viewer = None
@@ -85,7 +89,7 @@ class ToyEnv(gym.Env):
         distance = np.linalg.norm(self.agent_position - self.target_positions[0])
         if distance < self.TARGET_EPSILON:
             reward = self.MAX_REWARD
-            self.target_positions = (*self.target_positions[1:], self.state_space[0].sample())
+            self.target_positions = (*self.target_positions[1:], self.observation_space[0].sample())
             self.previous_distance = np.linalg.norm(self.agent_position - self.target_positions[0])
         else:
             reward = self.previous_distance - distance
@@ -122,3 +126,11 @@ class ToyEnv(gym.Env):
 
         elif mode == 'file':
             pass
+
+
+    def close(self):
+        pass
+
+
+    def seed(self):
+        pass
