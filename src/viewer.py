@@ -25,7 +25,7 @@ class Viewer:
         super().__init__()
 
         self.env = env
-        self.viewer = None
+        self.viewer : rendering.Viewer = None
 
         self.offset = (self.env.MAX_POSITION, self.env.MAX_POSITION)
         self.scale = (self.VIEWER_WIDTH / (2*self.env.MAX_POSITION), self.VIEWER_HEIGHT / (2*self.env.MAX_POSITION))
@@ -74,8 +74,13 @@ class Viewer:
         self.agent_transform.set_translation(*(self.scale * (self.env.agent_position + self.offset)))
         self.target_transform.set_translation(*(self.scale * (self.env.target_positions[0] + self.offset)))
         
+        line = rendering.Line(start=(self.scale * (self.env.agent_position + self.offset)), end=(self.scale * (self.env.target_positions[0] + self.offset)))
+        self.viewer.add_onetime(line)
         for idx, observable_transform in enumerate(self.observable_transform):
             self.observable[idx].set_color(0, 1 - idx * 1/len(self.observable_transform), idx * 1/len(self.observable_transform))
             observable_transform.set_translation(*(self.scale * (self.env.target_positions[idx+1] + self.offset)))
+
+            line = rendering.Line(start=(self.scale * (self.env.target_positions[idx] + self.offset)), end=(self.scale * (self.env.target_positions[idx+1] + self.offset)))
+            self.viewer.add_onetime(line)
 
         return self.viewer.render(return_rgb_array = mode == 'rgb_array')
