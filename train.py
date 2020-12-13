@@ -6,17 +6,18 @@ from src.env import ToyEnv
 from src.viewer import Viewer
 from src.policy import RandomPolicy, HardcodedPolicy, TrainedPolicy
 
+import tensorflow as tf
 
 def main():
 
-    env = ToyEnv(Viewer=Viewer, ndim=2, num_observables=20)
+    env = ToyEnv(Viewer=Viewer, ndim=2, num_observables=5)
     env.reset()
 
     total_reward = 0
     episode = []
 
     state = None
-    policy = HardcodedPolicy(env.state_space, env.action_space)
+    policy = HardcodedPolicy(env.observation_space, env.action_space)
     for _ in range(10000):
 
         env.render('human')
