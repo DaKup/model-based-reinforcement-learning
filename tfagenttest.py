@@ -10,10 +10,24 @@ from tf_agents.environments import py_environment
 from tf_agents.environments import tf_environment
 from tf_agents.environments import tf_py_environment
 from tf_agents.environments import utils
+from tf_agents.replay_buffers import replay_buffer
 from tf_agents.specs import array_spec
 from tf_agents.environments import wrappers
 from tf_agents.environments import suite_gym
 from tf_agents.trajectories import time_step as ts
+
+from tf_agents.drivers.py_driver import PyDriver
+from tf_agents.drivers.tf_driver import TFDriver
+from tf_agents.drivers.dynamic_step_driver import DynamicStepDriver
+
+from tf_agents.policies.random_py_policy import RandomPyPolicy
+from tf_agents.policies.random_tf_policy import RandomTFPolicy
+
+from tf_agents.metrics.py_metrics import AverageReturnMetric
+
+from tf_agents.replay_buffers.py_uniform_replay_buffer import PyUniformReplayBuffer
+
+from tf_agents.agents.tf_agent import TFAgent
 
 tf.compat.v1.enable_v2_behavior()
 
@@ -39,6 +53,33 @@ time_step = tf_env.reset()
 rewards = []
 steps = []
 num_episodes = 5
+
+
+time_step_spec = env.time_step_spec()
+action_spec = env.action_spec()
+policy = RandomPyPolicy(time_step_spec, action_spec)
+
+metric = AverageReturnMetric()
+replay_buffer = []
+observers = [replay_buffer.append, metric]
+
+# replay_buffer = PyUniformReplayBuffer(data_spec=None, capacity=2000)
+
+driver = PyDriver(env, policy, observers, max_steps=2000 )
+# driver = PyDriver(env, policy, observers, max_steps=20, max_episodes=1)
+
+initial_time_step = env.reset()
+final_time_step, _ = driver.run(initial_time_step)
+
+print('Replay Buffer:')
+for traj in replay_buffer:
+  print(traj)
+
+# agent = TFAgent()
+
+print('Average Return: ', metric.result())
+
+
 
 for _ in range(num_episodes):
     
