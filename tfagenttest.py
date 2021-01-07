@@ -28,6 +28,7 @@ from tf_agents.metrics.py_metrics import AverageReturnMetric
 from tf_agents.replay_buffers.py_uniform_replay_buffer import PyUniformReplayBuffer
 
 from tf_agents.agents.tf_agent import TFAgent
+from tf_agents.agents.ppo.ppo_policy import PPOPolicy
 
 tf.compat.v1.enable_v2_behavior()
 
@@ -41,7 +42,7 @@ env = suite_gym.load('Trajectory-v0',
         'num_observables': 15,
         'max_targets': 100,
         'max_steps': 5000,
-        'max_steps_without_target': 1000,
+        'max_steps_without_target': 5000,
         'max_position': 100.0,
         'max_acceleration': 10.2,
         'max_velocity': 15.0,
@@ -54,9 +55,12 @@ rewards = []
 steps = []
 num_episodes = 5
 
+# utils.validate_py_environment(env)
+
 
 time_step_spec = env.time_step_spec()
 action_spec = env.action_spec()
+
 policy = RandomPyPolicy(time_step_spec, action_spec)
 
 metric = AverageReturnMetric()
@@ -65,15 +69,17 @@ observers = [replay_buffer.append, metric]
 
 # replay_buffer = PyUniformReplayBuffer(data_spec=None, capacity=2000)
 
-driver = PyDriver(env, policy, observers, max_steps=2000 )
+driver = PyDriver(env, policy, observers, max_steps=2000)
+# driver = PyDriver(env, policy, observers, max_episodes=1)
 # driver = PyDriver(env, policy, observers, max_steps=20, max_episodes=1)
+
 
 initial_time_step = env.reset()
 final_time_step, _ = driver.run(initial_time_step)
 
-print('Replay Buffer:')
-for traj in replay_buffer:
-  print(traj)
+# print('Replay Buffer:')
+# for traj in replay_buffer:
+#   print(traj)
 
 # agent = TFAgent()
 
