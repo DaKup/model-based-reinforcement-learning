@@ -75,11 +75,53 @@ def prepare_datasets(episodes):
     return transitions, rewards
 
 
+
+def predict_observation(env, net, obs, a):
+
+    input_batch = np.zeros(shape=(1, 3+env.num_observables, env.num_dimensions))
+    input_batch[0, 0] = obs[0]
+    input_batch[0, 1] = obs[1]
+    input_batch[0, 2:-1] = obs[2]
+    input_batch[0, -1] = a
+
+    output_batch = net(input_batch)
+    output_batch = output_batch.numpy()
+
+    obs_pred = (output_batch[0, 0], output_batch[0, 1], tuple([_ for _ in output_batch[0, 2:]]))
+    return obs_pred
+
+
+def predict_reward(env, net, obs, a):
+    
+    input_batch = np.zeros(shape=(1, 3+env.num_observables, env.num_dimensions))
+    input_batch[0, 0] = obs[0]
+    input_batch[0, 1] = obs[1]
+    input_batch[0, 2:-1] = obs[2]
+    input_batch[0, -1] = a
+
+    output_batch = net(input_batch)
+    output_batch = output_batch.numpy()
+
+    r_pred = output_batch[0].item()
+    return r_pred
+
+
+
 def main():
     
+    num_episodes = 1000
+    steps_per_episode = 500
+
+    epochs = 100
+    batch_size = 500
+    render = False
+
+
     env = gym.make('Trajectory-v0')
-    episodes = collect_data(env, 10, 100, RandomPolicy(env))
+    episodes = collect_data(env, num_episodes, steps_per_episode, RandomPolicy(env), render)
     transitions, rewards = prepare_datasets(episodes)
+
+
     
     transition_net = keras.Sequential([
         keras.layers.Input(shape=(3+env.num_observables, env.num_dimensions)),
@@ -90,9 +132,7 @@ def main():
         keras.layers.Reshape((2+env.num_observables, env.num_dimensions))
     ])
     transition_net.compile(optimizer='adam', loss='mse')
-    transition_net.fit(transitions[0], transitions[1], epochs=15, batch_size=10)
-    
-    
+
     reward_net = keras.Sequential([
         keras.layers.Input(shape=(3+env.num_observables, env.num_dimensions)),
         keras.layers.Flatten(),
@@ -101,10 +141,44 @@ def main():
         keras.layers.Dense(1)
     ])
     reward_net.compile(optimizer='adam', loss='mse')
-    reward_net.fit(rewards[0], rewards[1], epochs=15, batch_size=10)
+    
+    transition_net.evaluate(transitions[0], transitions[1], batch_size=batch_size)
+    reward_net.evaluate(rewards[0], rewards[1], batch_size=batch_size)
+    
+    
+    transition_net.fit(transitions[0], transitions[1], epochs=epochs, batch_size=batch_size)
+    reward_net.fit(rewards[0], rewards[1], epochs=epochs, batch_size=batch_size)
+    
+    
+    # 2nd iteration training:
+    env = gym.make('Trajectory-v0')
+    episodes = collect_data(env, num_episodes, steps_per_episode, RandomPolicy(env), render)
+    transitions, rewards = prepare_datasets(episodes)
+    transition_net.fit(transitions[0], transitions[1], epochs=epochs, batch_size=batch_size)
+    reward_net.fit(rewards[0], rewards[1], epochs=epochs, batch_size=batch_size)
+
+    # evaluate:
+    env = gym.make('Trajectory-v0')
+    episodes = collect_data(env, num_episodes, steps_per_episode, RandomPolicy(env), render)
+    transitions, rewards = prepare_datasets(episodes)
+    transition_net.evaluate(transitions[0], transitions[1], batch_size=batch_size)
+    reward_net.evaluate(rewards[0], rewards[1], batch_size=batch_size)
+
+    
+    # test inference:
+    env = gym.make('Trajectory-v0')
+    obs = env.reset()
+    policy = RandomPolicy(env)
+    a = policy.sample(obs)
+
+    # predicted obs and r:
+    obs_pred = predict_observation(env, transition_net, obs, a)
+    r_pred = predict_reward(env, reward_net, obs, a)
+
+    # actual obs and r:
+    (obs_real, r_real, done, info) = env.step(a)
+
     pass
-
-
 
 if __name__ == "__main__":
     main()
