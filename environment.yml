@@ -1,0 +1,10 @@
+name: MBRL
+channels:
+  - conda-forge
+  - anaconda
+  - defaults
+dependencies:
+  - tensorflow-gpu
+  - pip:
+    - gym
+    - tf-agents
