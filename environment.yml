@@ -7,4 +7,5 @@ dependencies:
   - tensorflow-gpu
   - pip:
     - gym
+    - gym-trajectory
     - tf-agents
