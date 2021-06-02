@@ -9,3 +9,4 @@ dependencies:
     - gym
     - gym-trajectory
     - tf-agents
+    - dearpygui
